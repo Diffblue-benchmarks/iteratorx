@@ -1,0 +1,370 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 198.0
+#  >methods=9
+#  >complexity=88
+#  >construction=9.0
+#  >dependency=0.25
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/samples/ParallelsUsage.class
+     sourceDir: src
+     sourceFile: io/iteratorx/samples/ParallelsUsage.java
+   - dir: target/classes
+     file: io/iteratorx/reader/DataSourceBuilder$JdbcDataSourceBuilder.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/DataSourceBuilder.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/RxJava.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/RxJava.java
+   - dir: target/classes
+     file: io/iteratorx/reader/DataSourceBuilder.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/DataSourceBuilder.java
+   - dir: target/classes
+     file: io/iteratorx/reader/JdbcReader.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/JdbcReader.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/Flink.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Flink.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/Threads.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Threads.java
+# Target TGF: 88.0
+#  >methods=15
+#  >complexity=82
+#  >construction=11.0357142857
+#  >dependency=7.0
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/parallels/RxJava.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/RxJava.java
+   - dir: target/classes
+     file: io/iteratorx/Consumer.class
+     sourceDir: src
+     sourceFile: io/iteratorx/Consumer.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/Parallels.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Parallels.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/RxJava$1.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/RxJava.java
+# Target TGF: 558.0
+#  >methods=2
+#  >complexity=62
+#  >construction=9.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/samples/JdbcReaderUsage.class
+     sourceDir: src
+     sourceFile: io/iteratorx/samples/JdbcReaderUsage.java
+   - dir: target/classes
+     file: io/iteratorx/reader/DataSourceBuilder$JdbcDataSourceBuilder.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/DataSourceBuilder.java
+   - dir: target/classes
+     file: io/iteratorx/reader/DataSourceBuilder.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/DataSourceBuilder.java
+   - dir: target/classes
+     file: io/iteratorx/reader/JdbcReader.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/JdbcReader.java
+# Target TGF: 885.6
+#  >methods=5
+#  >complexity=151
+#  >construction=27.0
+#  >dependency=1.7
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/reader/IOUtils.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/IOUtils.java
+# Target TGF: 72.75
+#  >methods=7
+#  >complexity=132
+#  >construction=2.5
+#  >dependency=4.0
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/reader/FileReader.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/FileReader.java
+   - dir: target/classes
+     file: io/iteratorx/reader/FileReader$1.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/FileReader.java
+# Target TGF: 288.0
+#  >methods=2
+#  >complexity=32
+#  >construction=9.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/samples/JdbcWriterUsage.class
+     sourceDir: src
+     sourceFile: io/iteratorx/samples/JdbcWriterUsage.java
+   - dir: target/classes
+     file: io/iteratorx/reader/DataSourceBuilder$JdbcDataSourceBuilder.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/DataSourceBuilder.java
+   - dir: target/classes
+     file: io/iteratorx/reader/DataSourceBuilder.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/DataSourceBuilder.java
+   - dir: target/classes
+     file: io/iteratorx/reader/JdbcWriter.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/JdbcWriter.java
+   - dir: target/classes
+     file: io/iteratorx/reader/JdbcReader.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/JdbcReader.java
+# Target TGF: 85.75
+#  >methods=15
+#  >complexity=88
+#  >construction=11.0357142857
+#  >dependency=6.83333333333
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/parallels/Flink.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Flink.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/Flink$1.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Flink.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/Flink$IteratorInputFormatProxy.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Flink.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/Parallels.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Parallels.java
+   - dir: target/classes
+     file: io/iteratorx/Consumer.class
+     sourceDir: src
+     sourceFile: io/iteratorx/Consumer.java
+# Target TGF: 117.375
+#  >methods=14
+#  >complexity=195
+#  >construction=12.0
+#  >dependency=6.66666666667
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/parallels/Threads.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Threads.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/Parallels.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Parallels.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/Threads$1.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Threads.java
+   - dir: target/classes
+     file: io/iteratorx/parallels/Threads$2.class
+     sourceDir: src
+     sourceFile: io/iteratorx/parallels/Threads.java
+# Target TGF: 504.0
+#  >methods=2
+#  >complexity=56
+#  >construction=9.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/samples/FileReaderUsage.class
+     sourceDir: src
+     sourceFile: io/iteratorx/samples/FileReaderUsage.java
+   - dir: target/classes
+     file: io/iteratorx/reader/FileReader.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/FileReader.java
+# Target TGF: 117.45
+#  >methods=9
+#  >complexity=215
+#  >construction=4.75
+#  >dependency=5.45
+ - target:
+   - dir: target/classes
+     file: io/iteratorx/reader/JdbcWriter.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/JdbcWriter.java
+   - dir: target/classes
+     file: io/iteratorx/reader/IOUtils.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/IOUtils.java
+   - dir: target/classes
+     file: io/iteratorx/reader/JdbcWriter$1.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/JdbcWriter.java
+   - dir: target/classes
+     file: io/iteratorx/reader/JdbcReader.class
+     sourceDir: src
+     sourceFile: io/iteratorx/reader/JdbcReader.java
